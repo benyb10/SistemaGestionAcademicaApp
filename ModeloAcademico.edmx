@@ -1,0 +1,414 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="SistemaGestionAcademicaModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Materias">
+          <Key>
+            <PropertyRef Name="IdMateria" />
+          </Key>
+          <Property Name="IdMateria" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="NombreMateria" Type="varchar" MaxLength="100" />
+          <Property Name="Creditos" Type="int" />
+          <Property Name="IdSemestre" Type="int" />
+          <Property Name="IdProfesor" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="Matriculas">
+          <Key>
+            <PropertyRef Name="IdMatricula" />
+          </Key>
+          <Property Name="IdMatricula" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CedulaSecretaria" Type="varchar" MaxLength="10" />
+          <Property Name="CedulaEstudiante" Type="varchar" MaxLength="10" />
+          <Property Name="IdMateria" Type="varchar" MaxLength="10" />
+          <Property Name="RepiteMateria" Type="tinyint" />
+        </EntityType>
+        <EntityType Name="Notas">
+          <Key>
+            <PropertyRef Name="IdNotas" />
+          </Key>
+          <Property Name="IdNotas" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdMatricula" Type="int" />
+          <Property Name="Nota1" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="Nota2" Type="decimal" Precision="5" Scale="2" />
+          <Property Name="Supletorio" Type="decimal" Precision="5" Scale="2" />
+        </EntityType>
+        <EntityType Name="Semestres">
+          <Key>
+            <PropertyRef Name="IdSemestre" />
+          </Key>
+          <Property Name="IdSemestre" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="NombreSemestre" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="Usuarios">
+          <Key>
+            <PropertyRef Name="Cedula" />
+          </Key>
+          <Property Name="Cedula" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="PrimerNombre" Type="varchar" MaxLength="50" />
+          <Property Name="SegundoNombre" Type="varchar" MaxLength="50" />
+          <Property Name="PrimerApellido" Type="varchar" MaxLength="50" />
+          <Property Name="SegundoApellido" Type="varchar" MaxLength="50" />
+          <Property Name="CorreoInstitucional" Type="varchar" MaxLength="100" />
+          <Property Name="Provincia" Type="varchar" MaxLength="50" />
+          <Property Name="Rol" Type="varchar" MaxLength="20" />
+        </EntityType>
+        <Association Name="FK__Materias__IdSeme__48CFD27E">
+          <End Role="Semestres" Type="Self.Semestres" Multiplicity="0..1" />
+          <End Role="Materias" Type="Self.Materias" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Semestres">
+              <PropertyRef Name="IdSemestre" />
+            </Principal>
+            <Dependent Role="Materias">
+              <PropertyRef Name="IdSemestre" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Matricula__Cedul__403A8C7D">
+          <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="0..1" />
+          <End Role="Matriculas" Type="Self.Matriculas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Cedula" />
+            </Principal>
+            <Dependent Role="Matriculas">
+              <PropertyRef Name="CedulaSecretaria" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Matricula__Cedul__412EB0B6">
+          <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="0..1" />
+          <End Role="Matriculas" Type="Self.Matriculas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Cedula" />
+            </Principal>
+            <Dependent Role="Matriculas">
+              <PropertyRef Name="CedulaEstudiante" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Notas__IdMatricu__44FF419A">
+          <End Role="Matriculas" Type="Self.Matriculas" Multiplicity="0..1" />
+          <End Role="Notas" Type="Self.Notas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Matriculas">
+              <PropertyRef Name="IdMatricula" />
+            </Principal>
+            <Dependent Role="Notas">
+              <PropertyRef Name="IdMatricula" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Materias_Usuarios_IdProfesor">
+          <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="0..1" />
+          <End Role="Materias" Type="Self.Materias" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Cedula" />
+            </Principal>
+            <Dependent Role="Materias">
+              <PropertyRef Name="IdProfesor" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Matriculas_Materias_IdMateria">
+          <End Role="Materias" Type="Self.Materias" Multiplicity="0..1" />
+          <End Role="Matriculas" Type="Self.Matriculas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Materias">
+              <PropertyRef Name="IdMateria" />
+            </Principal>
+            <Dependent Role="Matriculas">
+              <PropertyRef Name="IdMateria" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="SistemaGestionAcademicaModelStoreContainer">
+          <EntitySet Name="Materias" EntityType="Self.Materias" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Matriculas" EntityType="Self.Matriculas" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Notas" EntityType="Self.Notas" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Semestres" EntityType="Self.Semestres" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Usuarios" EntityType="Self.Usuarios" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__Materias__IdSeme__48CFD27E" Association="Self.FK__Materias__IdSeme__48CFD27E">
+            <End Role="Semestres" EntitySet="Semestres" />
+            <End Role="Materias" EntitySet="Materias" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Matricula__Cedul__403A8C7D" Association="Self.FK__Matricula__Cedul__403A8C7D">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="Matriculas" EntitySet="Matriculas" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Matricula__Cedul__412EB0B6" Association="Self.FK__Matricula__Cedul__412EB0B6">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="Matriculas" EntitySet="Matriculas" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Notas__IdMatricu__44FF419A" Association="Self.FK__Notas__IdMatricu__44FF419A">
+            <End Role="Matriculas" EntitySet="Matriculas" />
+            <End Role="Notas" EntitySet="Notas" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Materias_Usuarios_IdProfesor" Association="Self.FK_Materias_Usuarios_IdProfesor">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="Materias" EntitySet="Materias" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Matriculas_Materias_IdMateria" Association="Self.FK_Matriculas_Materias_IdMateria">
+            <End Role="Materias" EntitySet="Materias" />
+            <End Role="Matriculas" EntitySet="Matriculas" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="SistemaGestionAcademicaModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Materias">
+          <Key>
+            <PropertyRef Name="IdMateria" />
+          </Key>
+          <Property Name="IdMateria" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NombreMateria" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Creditos" Type="Int32" />
+          <Property Name="IdSemestre" Type="Int32" />
+          <NavigationProperty Name="Semestres" Relationship="Self.FK__Materias__IdSeme__48CFD27E" FromRole="Materias" ToRole="Semestres" />
+          <NavigationProperty Name="Matriculas" Relationship="Self.FK_Matriculas_Materias_IdMateria" FromRole="Materias" ToRole="Matriculas" />
+          <Property Name="IdProfesor" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Usuarios" Relationship="SistemaGestionAcademicaModel.FK_Materias_Usuarios_IdProfesor" FromRole="Materias" ToRole="Usuarios" />
+        </EntityType>
+        <EntityType Name="Matriculas">
+          <Key>
+            <PropertyRef Name="IdMatricula" />
+          </Key>
+          <Property Name="IdMatricula" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CedulaSecretaria" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="CedulaEstudiante" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="IdMateria" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RepiteMateria" Type="Byte" />
+          <NavigationProperty Name="Materias" Relationship="Self.FK_Matriculas_Materias_IdMateria" FromRole="Matriculas" ToRole="Materias" />
+          <NavigationProperty Name="Usuarios" Relationship="Self.FK__Matricula__Cedul__403A8C7D" FromRole="Matriculas" ToRole="Usuarios" />
+          <NavigationProperty Name="Usuarios1" Relationship="Self.FK__Matricula__Cedul__412EB0B6" FromRole="Matriculas" ToRole="Usuarios" />
+          <NavigationProperty Name="Notas" Relationship="Self.FK__Notas__IdMatricu__44FF419A" FromRole="Matriculas" ToRole="Notas" />
+        </EntityType>
+        <EntityType Name="Notas">
+          <Key>
+            <PropertyRef Name="IdNotas" />
+          </Key>
+          <Property Name="IdNotas" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdMatricula" Type="Int32" />
+          <Property Name="Nota1" Type="Decimal" Precision="5" Scale="2" />
+          <Property Name="Nota2" Type="Decimal" Precision="5" Scale="2" />
+          <Property Name="Supletorio" Type="Decimal" Precision="5" Scale="2" />
+          <NavigationProperty Name="Matriculas" Relationship="Self.FK__Notas__IdMatricu__44FF419A" FromRole="Notas" ToRole="Matriculas" />
+        </EntityType>
+        <EntityType Name="Semestres">
+          <Key>
+            <PropertyRef Name="IdSemestre" />
+          </Key>
+          <Property Name="IdSemestre" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="NombreSemestre" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Materias" Relationship="Self.FK__Materias__IdSeme__48CFD27E" FromRole="Semestres" ToRole="Materias" />
+        </EntityType>
+        <EntityType Name="Usuarios">
+          <Key>
+            <PropertyRef Name="Cedula" />
+          </Key>
+          <Property Name="Cedula" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="PrimerNombre" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="SegundoNombre" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PrimerApellido" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="SegundoApellido" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CorreoInstitucional" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Provincia" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Rol" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Matriculas" Relationship="Self.FK__Matricula__Cedul__403A8C7D" FromRole="Usuarios" ToRole="Matriculas" />
+          <NavigationProperty Name="Matriculas1" Relationship="Self.FK__Matricula__Cedul__412EB0B6" FromRole="Usuarios" ToRole="Matriculas" />
+          <NavigationProperty Name="Materias" Relationship="SistemaGestionAcademicaModel.FK_Materias_Usuarios_IdProfesor" FromRole="Usuarios" ToRole="Materias" />
+        </EntityType>
+        <Association Name="FK__Materias__IdSeme__48CFD27E">
+          <End Role="Semestres" Type="Self.Semestres" Multiplicity="0..1" />
+          <End Role="Materias" Type="Self.Materias" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Semestres">
+              <PropertyRef Name="IdSemestre" />
+            </Principal>
+            <Dependent Role="Materias">
+              <PropertyRef Name="IdSemestre" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Matriculas_Materias_IdMateria">
+          <End Role="Materias" Type="Self.Materias" Multiplicity="0..1" />
+          <End Role="Matriculas" Type="Self.Matriculas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Materias">
+              <PropertyRef Name="IdMateria" />
+            </Principal>
+            <Dependent Role="Matriculas">
+              <PropertyRef Name="IdMateria" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Matricula__Cedul__403A8C7D">
+          <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="0..1" />
+          <End Role="Matriculas" Type="Self.Matriculas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Cedula" />
+            </Principal>
+            <Dependent Role="Matriculas">
+              <PropertyRef Name="CedulaSecretaria" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Matricula__Cedul__412EB0B6">
+          <End Role="Usuarios" Type="Self.Usuarios" Multiplicity="0..1" />
+          <End Role="Matriculas" Type="Self.Matriculas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Cedula" />
+            </Principal>
+            <Dependent Role="Matriculas">
+              <PropertyRef Name="CedulaEstudiante" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Notas__IdMatricu__44FF419A">
+          <End Role="Matriculas" Type="Self.Matriculas" Multiplicity="0..1" />
+          <End Role="Notas" Type="Self.Notas" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Matriculas">
+              <PropertyRef Name="IdMatricula" />
+            </Principal>
+            <Dependent Role="Notas">
+              <PropertyRef Name="IdMatricula" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="SistemaGestionAcademicaEntities1" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Materias" EntityType="Self.Materias" />
+          <EntitySet Name="Matriculas" EntityType="Self.Matriculas" />
+          <EntitySet Name="Notas" EntityType="Self.Notas" />
+          <EntitySet Name="Semestres" EntityType="Self.Semestres" />
+          <EntitySet Name="Usuarios" EntityType="Self.Usuarios" />
+          <AssociationSet Name="FK__Materias__IdSeme__48CFD27E" Association="Self.FK__Materias__IdSeme__48CFD27E">
+            <End Role="Semestres" EntitySet="Semestres" />
+            <End Role="Materias" EntitySet="Materias" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Matriculas_Materias_IdMateria" Association="Self.FK_Matriculas_Materias_IdMateria">
+            <End Role="Materias" EntitySet="Materias" />
+            <End Role="Matriculas" EntitySet="Matriculas" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Matricula__Cedul__403A8C7D" Association="Self.FK__Matricula__Cedul__403A8C7D">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="Matriculas" EntitySet="Matriculas" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Matricula__Cedul__412EB0B6" Association="Self.FK__Matricula__Cedul__412EB0B6">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="Matriculas" EntitySet="Matriculas" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Notas__IdMatricu__44FF419A" Association="Self.FK__Notas__IdMatricu__44FF419A">
+            <End Role="Matriculas" EntitySet="Matriculas" />
+            <End Role="Notas" EntitySet="Notas" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Materias_Usuarios_IdProfesor" Association="SistemaGestionAcademicaModel.FK_Materias_Usuarios_IdProfesor">
+            <End Role="Usuarios" EntitySet="Usuarios" />
+            <End Role="Materias" EntitySet="Materias" />
+          </AssociationSet>
+        </EntityContainer>
+        <Association Name="FK_Materias_Usuarios_IdProfesor">
+          <End Type="SistemaGestionAcademicaModel.Usuarios" Role="Usuarios" Multiplicity="0..1" />
+          <End Type="SistemaGestionAcademicaModel.Materias" Role="Materias" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Usuarios">
+              <PropertyRef Name="Cedula" />
+            </Principal>
+            <Dependent Role="Materias">
+              <PropertyRef Name="IdProfesor" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="SistemaGestionAcademicaModelStoreContainer" CdmEntityContainer="SistemaGestionAcademicaEntities1">
+          <EntitySetMapping Name="Materias">
+            <EntityTypeMapping TypeName="SistemaGestionAcademicaModel.Materias">
+              <MappingFragment StoreEntitySet="Materias">
+                <ScalarProperty Name="IdProfesor" ColumnName="IdProfesor" />
+                <ScalarProperty Name="IdMateria" ColumnName="IdMateria" />
+                <ScalarProperty Name="NombreMateria" ColumnName="NombreMateria" />
+                <ScalarProperty Name="Creditos" ColumnName="Creditos" />
+                <ScalarProperty Name="IdSemestre" ColumnName="IdSemestre" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Matriculas">
+            <EntityTypeMapping TypeName="SistemaGestionAcademicaModel.Matriculas">
+              <MappingFragment StoreEntitySet="Matriculas">
+                <ScalarProperty Name="IdMatricula" ColumnName="IdMatricula" />
+                <ScalarProperty Name="CedulaSecretaria" ColumnName="CedulaSecretaria" />
+                <ScalarProperty Name="CedulaEstudiante" ColumnName="CedulaEstudiante" />
+                <ScalarProperty Name="IdMateria" ColumnName="IdMateria" />
+                <ScalarProperty Name="RepiteMateria" ColumnName="RepiteMateria" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Notas">
+            <EntityTypeMapping TypeName="SistemaGestionAcademicaModel.Notas">
+              <MappingFragment StoreEntitySet="Notas">
+                <ScalarProperty Name="IdNotas" ColumnName="IdNotas" />
+                <ScalarProperty Name="IdMatricula" ColumnName="IdMatricula" />
+                <ScalarProperty Name="Nota1" ColumnName="Nota1" />
+                <ScalarProperty Name="Nota2" ColumnName="Nota2" />
+                <ScalarProperty Name="Supletorio" ColumnName="Supletorio" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Semestres">
+            <EntityTypeMapping TypeName="SistemaGestionAcademicaModel.Semestres">
+              <MappingFragment StoreEntitySet="Semestres">
+                <ScalarProperty Name="IdSemestre" ColumnName="IdSemestre" />
+                <ScalarProperty Name="NombreSemestre" ColumnName="NombreSemestre" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Usuarios">
+            <EntityTypeMapping TypeName="SistemaGestionAcademicaModel.Usuarios">
+              <MappingFragment StoreEntitySet="Usuarios">
+                <ScalarProperty Name="Cedula" ColumnName="Cedula" />
+                <ScalarProperty Name="PrimerNombre" ColumnName="PrimerNombre" />
+                <ScalarProperty Name="SegundoNombre" ColumnName="SegundoNombre" />
+                <ScalarProperty Name="PrimerApellido" ColumnName="PrimerApellido" />
+                <ScalarProperty Name="SegundoApellido" ColumnName="SegundoApellido" />
+                <ScalarProperty Name="CorreoInstitucional" ColumnName="CorreoInstitucional" />
+                <ScalarProperty Name="Provincia" ColumnName="Provincia" />
+                <ScalarProperty Name="Rol" ColumnName="Rol" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Ninguno" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
