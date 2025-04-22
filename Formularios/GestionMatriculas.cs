@@ -31,51 +31,65 @@ namespace SistemaGestionAcademicaApp.Formularios
 
         private void CargarNombreCompleto()
         {
-            string cedulaEstudiante = SesionActual.CedulaUsuario;
-
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var consulta = (from m in db.Usuarios
-                                where m.Cedula == cedulaEstudiante
-                                select new
-                                {
-                                    NombreCompleto = m.PrimerNombre + " " + m.SegundoNombre + " " +
-                                                     m.PrimerApellido + " " + m.SegundoApellido
-                                }).FirstOrDefault(); // <-- Esto obtiene el primer resultado
+                string cedulaEstudiante = SesionActual.CedulaUsuario;
 
-                if (consulta != null)
+                using (var db = new SistemaGestionAcademicaEntities1())
                 {
-                    lblNombreCompleto.Text = consulta.NombreCompleto;
+                    var consulta = (from m in db.Usuarios
+                                    where m.Cedula == cedulaEstudiante
+                                    select new
+                                    {
+                                        NombreCompleto = m.PrimerNombre + " " + m.SegundoNombre + " " +
+                                                         m.PrimerApellido + " " + m.SegundoApellido
+                                    }).FirstOrDefault();
+
+                    lblNombreCompleto.Text = consulta != null ? consulta.NombreCompleto : "Estudiante no encontrado";
                 }
-                else
-                {
-                    lblNombreCompleto.Text = "Estudiante no encontrado";
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar nombre completo: " + ex.Message);
             }
         }
 
         private void cmbSemestres_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cmbSemestres.SelectedValue != null && int.TryParse(cmbSemestres.SelectedValue.ToString(), out int idSemestre))
+            try
             {
-                CargarMaterias(idSemestre);
+                if (cmbSemestres.SelectedValue != null && int.TryParse(cmbSemestres.SelectedValue.ToString(), out int idSemestre))
+                {
+                    CargarMaterias(idSemestre);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cambiar semestre: " + ex.Message);
             }
         }
 
         private void CargarSemestres()
         {
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var semestres = db.Semestres
-                                 .Select(s => new {
-                                     s.IdSemestre,
-                                     s.NombreSemestre
-                                 })
-                                 .ToList();
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var semestres = db.Semestres
+                                     .Select(s => new {
+                                         s.IdSemestre,
+                                         s.NombreSemestre
+                                     })
+                                     .ToList();
 
-                cmbSemestres.DataSource = semestres;
-                cmbSemestres.DisplayMember = "NombreSemestre";
-                cmbSemestres.ValueMember = "IdSemestre";
+                    cmbSemestres.DataSource = semestres;
+                    cmbSemestres.DisplayMember = "NombreSemestre";
+                    cmbSemestres.ValueMember = "IdSemestre";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar los semestres: " + ex.Message);
             }
         }
         private void ExportarMatriculasAExcel()
@@ -117,21 +131,28 @@ namespace SistemaGestionAcademicaApp.Formularios
 
         private void CargarMatriculas()
         {
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var lista = (from m in db.Matriculas
-                             join est in db.Usuarios on m.CedulaEstudiante equals est.Cedula
-                             join mat in db.Materias on m.IdMateria equals mat.IdMateria
-                             select new
-                             {
-                                 m.IdMatricula,
-                                 m.CedulaEstudiante,
-                                 Estudiante = est.PrimerNombre+" "+est.PrimerApellido,
-                                 Materia = mat.NombreMateria,
-                                 m.RepiteMateria
-                             }).ToList();
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var lista = (from m in db.Matriculas
+                                 join est in db.Usuarios on m.CedulaEstudiante equals est.Cedula
+                                 join mat in db.Materias on m.IdMateria equals mat.IdMateria
+                                 select new
+                                 {
+                                     m.IdMatricula,
+                                     m.CedulaEstudiante,
+                                     Estudiante = est.PrimerNombre + " " + est.PrimerApellido,
+                                     Materia = mat.NombreMateria,
+                                     m.RepiteMateria
+                                 }).ToList();
 
-                dataGridMatriculas.DataSource = lista;
+                    dataGridMatriculas.DataSource = lista;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar las matrículas: " + ex.Message);
             }
         }
         private void CargarRepiteMateria()
@@ -144,34 +165,48 @@ namespace SistemaGestionAcademicaApp.Formularios
         }
         private void CargarMaterias(int idSemestre)
         {
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var materias = db.Materias
-                                 .Where(m => m.IdSemestre == idSemestre)
-                                 .Select(m => new {
-                                     m.IdMateria,
-                                     m.NombreMateria
-                                 })
-                                 .ToList();
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var materias = db.Materias
+                                     .Where(m => m.IdSemestre == idSemestre)
+                                     .Select(m => new {
+                                         m.IdMateria,
+                                         m.NombreMateria
+                                     })
+                                     .ToList();
 
-                cmbMaterias.DataSource = materias;
-                cmbMaterias.DisplayMember = "NombreMateria";
-                cmbMaterias.ValueMember = "IdMateria";
+                    cmbMaterias.DataSource = materias;
+                    cmbMaterias.DisplayMember = "NombreMateria";
+                    cmbMaterias.ValueMember = "IdMateria";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar materias: " + ex.Message);
             }
         }
         private void CargarEstudiantes()
         {
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var estudiantes = db.Usuarios
-                                    .Where(u => u.Rol == "ESTUDIANTE")
-                                    .Select(u => new {
-                                        u.Cedula,
-                                        NombreCompleto = u.PrimerNombre+" "+u.PrimerApellido,
-                                    })
-                                    .ToList();
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var estudiantes = db.Usuarios
+                                        .Where(u => u.Rol == "ESTUDIANTE")
+                                        .Select(u => new {
+                                            u.Cedula,
+                                            NombreCompleto = u.PrimerNombre + " " + u.PrimerApellido,
+                                        })
+                                        .ToList();
 
-                dataGridEstudiantes.DataSource = estudiantes;
+                    dataGridEstudiantes.DataSource = estudiantes;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar estudiantes: " + ex.Message);
             }
         }
         private void button_Matricular_Click(object sender, EventArgs e)
@@ -231,105 +266,137 @@ namespace SistemaGestionAcademicaApp.Formularios
 
         private void btnBuscarEstudiante_Click(object sender, EventArgs e)
         {
-            string cedula = txtBuscarCedula.Text.Trim();
-
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var estudiante = db.Usuarios
-                                   .Where(u => u.Rol == "ESTUDIANTE" && u.Cedula == cedula)
-                                   .Select(u => new {
-                                       u.Cedula,
-                                       NombreCompleto = u.PrimerNombre + " " + u.PrimerApellido,
-                                   })
-                                   .ToList();
+                string cedula = txtBuscarCedula.Text.Trim();
 
-                dataGridEstudiantes.DataSource = estudiante;
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var estudiante = db.Usuarios
+                                       .Where(u => u.Rol == "ESTUDIANTE" && u.Cedula == cedula)
+                                       .Select(u => new {
+                                           u.Cedula,
+                                           NombreCompleto = u.PrimerNombre + " " + u.PrimerApellido,
+                                       })
+                                       .ToList();
+
+                    dataGridEstudiantes.DataSource = estudiante;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al buscar estudiante: " + ex.Message);
             }
         }
 
         private void btnCerrar_Click(object sender, EventArgs e)
         {
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var rol = db.Usuarios.FirstOrDefault(u => u.Cedula == SesionActual.CedulaUsuario && u.Rol == "ADMINISTRADOR");
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var rol = db.Usuarios.FirstOrDefault(u => u.Cedula == SesionActual.CedulaUsuario && u.Rol == "ADMINISTRADOR");
 
-                if (rol != null)
-                {
-                    new Admin().Show();
-                    this.Hide();
+                    if (rol != null)
+                    {
+                        new Admin().Show();
+                        this.Hide();
+                    }
+                    else
+                    {
+                        new Secretaria().Show();
+                        this.Hide();
+                    }
                 }
-                else
-                {
-                    new Secretaria().Show();
-                    this.Hide();
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cerrar sesión: " + ex.Message);
             }
         }
 
         private void button_Modificar_Click(object sender, EventArgs e)
         {
-            if (dataGridMatriculas.CurrentRow != null)
+            try
             {
-                int idMatricula = Convert.ToInt32(dataGridMatriculas.CurrentRow.Cells["IdMatricula"].Value);
-                string nuevaMateria = cmbMaterias.SelectedValue.ToString();
-                byte nuevoRepite = byte.Parse(cmbRepiteMateria.SelectedItem.ToString());
-                string nuevaCedula = txtBuscarCedula.Text;
-
-                using (var db = new SistemaGestionAcademicaEntities1())
+                if (dataGridMatriculas.CurrentRow != null)
                 {
-                    var matricula = db.Matriculas.FirstOrDefault(m => m.IdMatricula == idMatricula);
-                    if (matricula != null)
-                    {
-                        matricula.CedulaEstudiante = nuevaCedula;
-                        matricula.IdMateria = nuevaMateria;
-                        matricula.RepiteMateria = nuevoRepite;
+                    int idMatricula = Convert.ToInt32(dataGridMatriculas.CurrentRow.Cells["IdMatricula"].Value);
+                    string nuevaMateria = cmbMaterias.SelectedValue.ToString();
+                    byte nuevoRepite = byte.Parse(cmbRepiteMateria.SelectedItem.ToString());
+                    string nuevaCedula = txtBuscarCedula.Text;
 
-                        db.SaveChanges();
-                        MessageBox.Show("Matrícula modificada correctamente.");
-                        CargarMatriculas();
-                    }
-                }
-            }
-        }
-
-        private void dataGridMatriculas_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                txtBuscarCedula.Text = dataGridMatriculas.Rows[e.RowIndex].Cells["CedulaEstudiante"].Value.ToString();
-
-                // Seleccionar materia en combo
-                string nombreMateria = dataGridMatriculas.Rows[e.RowIndex].Cells["Materia"].Value.ToString();
-                cmbMaterias.SelectedIndex = cmbMaterias.FindStringExact(nombreMateria);
-
-                // Seleccionar repite
-                byte repite = Convert.ToByte(dataGridMatriculas.Rows[e.RowIndex].Cells["RepiteMateria"].Value);
-                cmbRepiteMateria.SelectedItem = repite;
-
-            }
-        }
-
-        private void button_Eliminar_Click(object sender, EventArgs e)
-        {
-            if (dataGridMatriculas.CurrentRow != null)
-            {
-                int idMatricula = Convert.ToInt32(dataGridMatriculas.CurrentRow.Cells["IdMatricula"].Value);
-
-                var confirm = MessageBox.Show("¿Está seguro de eliminar esta matrícula?", "Confirmar", MessageBoxButtons.YesNo);
-                if (confirm == DialogResult.Yes)
-                {
                     using (var db = new SistemaGestionAcademicaEntities1())
                     {
                         var matricula = db.Matriculas.FirstOrDefault(m => m.IdMatricula == idMatricula);
                         if (matricula != null)
                         {
-                            db.Matriculas.Remove(matricula);
+                            matricula.CedulaEstudiante = nuevaCedula;
+                            matricula.IdMateria = nuevaMateria;
+                            matricula.RepiteMateria = nuevoRepite;
+
                             db.SaveChanges();
-                            MessageBox.Show("Matrícula eliminada.");
+                            MessageBox.Show("Matrícula modificada correctamente.");
                             CargarMatriculas();
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al modificar matrícula: " + ex.Message);
+            }
+        }
+
+        private void dataGridMatriculas_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                if (e.RowIndex >= 0)
+                {
+                    txtBuscarCedula.Text = dataGridMatriculas.Rows[e.RowIndex].Cells["CedulaEstudiante"].Value.ToString();
+
+                    string nombreMateria = dataGridMatriculas.Rows[e.RowIndex].Cells["Materia"].Value.ToString();
+                    cmbMaterias.SelectedIndex = cmbMaterias.FindStringExact(nombreMateria);
+
+                    byte repite = Convert.ToByte(dataGridMatriculas.Rows[e.RowIndex].Cells["RepiteMateria"].Value);
+                    cmbRepiteMateria.SelectedItem = repite;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al seleccionar matrícula: " + ex.Message);
+            }
+        }
+
+        private void button_Eliminar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dataGridMatriculas.CurrentRow != null)
+                {
+                    int idMatricula = Convert.ToInt32(dataGridMatriculas.CurrentRow.Cells["IdMatricula"].Value);
+
+                    var confirm = MessageBox.Show("¿Está seguro de eliminar esta matrícula?", "Confirmar", MessageBoxButtons.YesNo);
+                    if (confirm == DialogResult.Yes)
+                    {
+                        using (var db = new SistemaGestionAcademicaEntities1())
+                        {
+                            var matricula = db.Matriculas.FirstOrDefault(m => m.IdMatricula == idMatricula);
+                            if (matricula != null)
+                            {
+                                db.Matriculas.Remove(matricula);
+                                db.SaveChanges();
+                                MessageBox.Show("Matrícula eliminada.");
+                                CargarMatriculas();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al eliminar matrícula: " + ex.Message);
             }
         }
 

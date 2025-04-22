@@ -23,26 +23,26 @@ namespace SistemaGestionAcademicaApp.Formularios
 
         private void CargarNombreCompleto()
         {
-            string cedulaEstudiante = SesionActual.CedulaUsuario;
-
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var consulta = (from m in db.Usuarios
-                                where m.Cedula == cedulaEstudiante
-                                select new
-                                {
-                                    NombreCompleto = m.PrimerNombre + " " + m.SegundoNombre + " " +
-                                                     m.PrimerApellido + " " + m.SegundoApellido
-                                }).FirstOrDefault(); // <-- Esto obtiene el primer resultado
+                string cedulaEstudiante = SesionActual.CedulaUsuario;
 
-                if (consulta != null)
+                using (var db = new SistemaGestionAcademicaEntities1())
                 {
-                    lblNombreCompleto.Text = consulta.NombreCompleto;
+                    var consulta = (from m in db.Usuarios
+                                    where m.Cedula == cedulaEstudiante
+                                    select new
+                                    {
+                                        NombreCompleto = m.PrimerNombre + " " + m.SegundoNombre + " " +
+                                                         m.PrimerApellido + " " + m.SegundoApellido
+                                    }).FirstOrDefault();
+
+                    lblNombreCompleto.Text = consulta != null ? consulta.NombreCompleto : "Estudiante no encontrado";
                 }
-                else
-                {
-                    lblNombreCompleto.Text = "Estudiante no encontrado";
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar el nombre del estudiante: " + ex.Message);
             }
         }
 
@@ -95,66 +95,89 @@ namespace SistemaGestionAcademicaApp.Formularios
 
         private void CargarMaterias()
         {
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var materias = db.Materias
-                                 .Select(m => new
-                                 {
-                                     m.IdMateria,
-                                     m.NombreMateria,
-                                     m.Creditos,
-                                     m.IdSemestre,
-                                     m.IdProfesor
-                                 })
-                                 .ToList();
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var materias = db.Materias
+                                     .Select(m => new
+                                     {
+                                         m.IdMateria,
+                                         m.NombreMateria,
+                                         m.Creditos,
+                                         m.IdSemestre,
+                                         m.IdProfesor
+                                     })
+                                     .ToList();
 
-                dgvMaterias.DataSource = materias;
+                    dgvMaterias.DataSource = materias;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar materias: " + ex.Message);
             }
         }
 
         private void CargarSemestresYProfesores()
         {
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                // Cargar semestres
-                var semestres = db.Semestres.Select(s => new { s.IdSemestre, s.NombreSemestre }).ToList();
-                cmbSemestre.DataSource = semestres;
-                cmbSemestre.DisplayMember = "NombreSemestre";
-                cmbSemestre.ValueMember = "IdSemestre";
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var semestres = db.Semestres.Select(s => new { s.IdSemestre, s.NombreSemestre }).ToList();
+                    cmbSemestre.DataSource = semestres;
+                    cmbSemestre.DisplayMember = "NombreSemestre";
+                    cmbSemestre.ValueMember = "IdSemestre";
 
-                // Cargar profesores
-                var profesores = db.Usuarios.Where(u => u.Rol == "PROFESOR")
-                                            .Select(p => new { p.Cedula, Nombre = p.PrimerNombre + " " + p.PrimerApellido })
-                                            .ToList();
-                cmbProfesor.DataSource = profesores;
-                cmbProfesor.DisplayMember = "Nombre";
-                cmbProfesor.ValueMember = "Cedula";
+                    var profesores = db.Usuarios.Where(u => u.Rol == "PROFESOR")
+                                                .Select(p => new { p.Cedula, Nombre = p.PrimerNombre + " " + p.PrimerApellido })
+                                                .ToList();
+                    cmbProfesor.DataSource = profesores;
+                    cmbProfesor.DisplayMember = "Nombre";
+                    cmbProfesor.ValueMember = "Cedula";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar semestres y profesores: " + ex.Message);
             }
         }
         private void btnAgregar_Click(object sender, EventArgs e)
         {
-            string id = txtIdMateria.Text.Trim();
-            string nombre = txtNombreMateria.Text.Trim();
-            int creditos = int.Parse(txtCreditos.Text.Trim());
-            int idSemestre = Convert.ToInt32(cmbSemestre.SelectedValue);
-            string idProfesor = cmbProfesor.SelectedValue.ToString();
-
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var materia = new Materias
-                {
-                    IdMateria = id,
-                    NombreMateria = nombre,
-                    Creditos = creditos,
-                    IdSemestre = idSemestre,
-                    IdProfesor = idProfesor
-                };
+                string id = txtIdMateria.Text.Trim();
+                string nombre = txtNombreMateria.Text.Trim();
+                int creditos = int.Parse(txtCreditos.Text.Trim());
+                int idSemestre = Convert.ToInt32(cmbSemestre.SelectedValue);
+                string idProfesor = cmbProfesor.SelectedValue.ToString();
 
-                db.Materias.Add(materia);
-                db.SaveChanges();
-                MessageBox.Show("Materia registrada correctamente.");
-                CargarMaterias();
-                LimpiarCampos();
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var materia = new Materias
+                    {
+                        IdMateria = id,
+                        NombreMateria = nombre,
+                        Creditos = creditos,
+                        IdSemestre = idSemestre,
+                        IdProfesor = idProfesor
+                    };
+
+                    db.Materias.Add(materia);
+                    db.SaveChanges();
+                    MessageBox.Show("Materia registrada correctamente.");
+                    CargarMaterias();
+                    LimpiarCampos();
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Por favor, verifique que los créditos sean un número válido.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al agregar materia: " + ex.Message);
             }
         }
 
@@ -175,44 +198,22 @@ namespace SistemaGestionAcademicaApp.Formularios
 
         private void btnModificar_Click(object sender, EventArgs e)
         {
-            string id = txtIdMateria.Text.Trim();
-
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var materia = db.Materias.FirstOrDefault(m => m.IdMateria == id);
-                if (materia != null)
-                {
-                    materia.NombreMateria = txtNombreMateria.Text.Trim();
-                    materia.Creditos = int.Parse(txtCreditos.Text.Trim());
-                    materia.IdSemestre = Convert.ToInt32(cmbSemestre.SelectedValue);
-                    materia.IdProfesor = cmbProfesor.SelectedValue.ToString();
+                string id = txtIdMateria.Text.Trim();
 
-                    db.SaveChanges();
-                    MessageBox.Show("Materia modificada correctamente.");
-                    CargarMaterias();
-                    LimpiarCampos();
-                }
-                else
-                {
-                    MessageBox.Show("Materia no encontrada.");
-                }
-            }
-        }
-
-        private void btnEliminar_Click(object sender, EventArgs e)
-        {
-            string id = txtIdMateria.Text.Trim();
-
-            if (MessageBox.Show("¿Está seguro de eliminar esta materia?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
-            {
                 using (var db = new SistemaGestionAcademicaEntities1())
                 {
                     var materia = db.Materias.FirstOrDefault(m => m.IdMateria == id);
                     if (materia != null)
                     {
-                        db.Materias.Remove(materia);
+                        materia.NombreMateria = txtNombreMateria.Text.Trim();
+                        materia.Creditos = int.Parse(txtCreditos.Text.Trim());
+                        materia.IdSemestre = Convert.ToInt32(cmbSemestre.SelectedValue);
+                        materia.IdProfesor = cmbProfesor.SelectedValue.ToString();
+
                         db.SaveChanges();
-                        MessageBox.Show("Materia eliminada correctamente.");
+                        MessageBox.Show("Materia modificada correctamente.");
                         CargarMaterias();
                         LimpiarCampos();
                     }
@@ -221,6 +222,46 @@ namespace SistemaGestionAcademicaApp.Formularios
                         MessageBox.Show("Materia no encontrada.");
                     }
                 }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("Por favor, verifique que los créditos sean un número válido.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al modificar la materia: " + ex.Message);
+            }
+        }
+
+        private void btnEliminar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string id = txtIdMateria.Text.Trim();
+
+                if (MessageBox.Show("¿Está seguro de eliminar esta materia?", "Confirmar", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    using (var db = new SistemaGestionAcademicaEntities1())
+                    {
+                        var materia = db.Materias.FirstOrDefault(m => m.IdMateria == id);
+                        if (materia != null)
+                        {
+                            db.Materias.Remove(materia);
+                            db.SaveChanges();
+                            MessageBox.Show("Materia eliminada correctamente.");
+                            CargarMaterias();
+                            LimpiarCampos();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Materia no encontrada.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al eliminar la materia: " + ex.Message);
             }
         }
 

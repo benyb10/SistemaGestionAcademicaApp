@@ -15,32 +15,39 @@ namespace SistemaGestionAcademicaApp.Formularios
         public GestionNotas()
         {
             InitializeComponent();
-            CargarNombreCompleto();
-            CargarMateriasDelProfesor(SesionActual.CedulaUsuario);
+            try
+            {
+                CargarNombreCompleto();
+                CargarMateriasDelProfesor(SesionActual.CedulaUsuario);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar los datos iniciales: " + ex.Message);
+            }
         }
 
         private void CargarNombreCompleto()
         {
-            string cedulaEstudiante = SesionActual.CedulaUsuario;
-
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var consulta = (from m in db.Usuarios
-                                where m.Cedula == cedulaEstudiante
-                                select new
-                                {
-                                    NombreCompleto = m.PrimerNombre + " " + m.SegundoNombre + " " +
-                                                     m.PrimerApellido + " " + m.SegundoApellido
-                                }).FirstOrDefault(); // <-- Esto obtiene el primer resultado
+                string cedulaEstudiante = SesionActual.CedulaUsuario;
 
-                if (consulta != null)
+                using (var db = new SistemaGestionAcademicaEntities1())
                 {
-                    lblNombreCompleto.Text = consulta.NombreCompleto;
+                    var consulta = (from m in db.Usuarios
+                                    where m.Cedula == cedulaEstudiante
+                                    select new
+                                    {
+                                        NombreCompleto = m.PrimerNombre + " " + m.SegundoNombre + " " +
+                                                         m.PrimerApellido + " " + m.SegundoApellido
+                                    }).FirstOrDefault();
+
+                    lblNombreCompleto.Text = consulta?.NombreCompleto ?? "Estudiante no encontrado";
                 }
-                else
-                {
-                    lblNombreCompleto.Text = "Estudiante no encontrado";
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar el nombre del estudiante: " + ex.Message);
             }
         }
 
@@ -53,15 +60,22 @@ namespace SistemaGestionAcademicaApp.Formularios
 
         private void CargarMateriasDelProfesor(string cedulaProfesor)
         {
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var materias = db.Materias
-                    .Where(m => m.IdProfesor == cedulaProfesor)
-                    .ToList();
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var materias = db.Materias
+                        .Where(m => m.IdProfesor == cedulaProfesor)
+                        .ToList();
 
-                cbxMaterias.DataSource = materias;
-                cbxMaterias.DisplayMember = "NombreMateria";
-                cbxMaterias.ValueMember = "IdMateria";
+                    cbxMaterias.DataSource = materias;
+                    cbxMaterias.DisplayMember = "NombreMateria";
+                    cbxMaterias.ValueMember = "IdMateria";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar materias: " + ex.Message);
             }
         }
 
@@ -78,23 +92,15 @@ namespace SistemaGestionAcademicaApp.Formularios
                 var excelApp = new Microsoft.Office.Interop.Excel.Application();
                 excelApp.Application.Workbooks.Add(Type.Missing);
 
-                // Encabezados
                 for (int i = 1; i <= dgvEstudiantes.Columns.Count; i++)
-                {
                     excelApp.Cells[1, i] = dgvEstudiantes.Columns[i - 1].HeaderText;
-                }
 
-                // Datos
                 for (int i = 0; i < dgvEstudiantes.Rows.Count; i++)
-                {
                     for (int j = 0; j < dgvEstudiantes.Columns.Count; j++)
-                    {
                         excelApp.Cells[i + 2, j + 1] = dgvEstudiantes.Rows[i].Cells[j].Value?.ToString() ?? "";
-                    }
-                }
 
                 excelApp.Visible = true;
-                MessageBox.Show("Exportado Correctamente");
+                MessageBox.Show("Exportado correctamente.");
             }
             catch (Exception ex)
             {
@@ -104,159 +110,204 @@ namespace SistemaGestionAcademicaApp.Formularios
 
         private void CargarEstudiantes()
         {
-            string idMateria = cbxMaterias.SelectedValue.ToString();
- 
-
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var consulta = from m in db.Matriculas
-                               join u in db.Usuarios on m.CedulaEstudiante equals u.Cedula
-                               join n in db.Notas on m.IdMatricula equals n.IdMatricula
-                               where m.IdMateria == idMateria 
-                               select new
-                               {
-                                   m.IdMatricula,
-                                   u.Cedula,
-                                   u.PrimerNombre,
-                                   u.PrimerApellido,
-                                   n.Nota1,
-                                   n.Nota2,
-                                   n.Supletorio,
-                               };
+                string idMateria = cbxMaterias.SelectedValue.ToString();
 
-                dgvEstudiantes.DataSource = consulta.ToList();
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var consulta = from m in db.Matriculas
+                                   join u in db.Usuarios on m.CedulaEstudiante equals u.Cedula
+                                   join n in db.Notas on m.IdMatricula equals n.IdMatricula
+                                   where m.IdMateria == idMateria
+                                   select new
+                                   {
+                                       m.IdMatricula,
+                                       u.Cedula,
+                                       u.PrimerNombre,
+                                       u.PrimerApellido,
+                                       n.Nota1,
+                                       n.Nota2,
+                                       n.Supletorio,
+                                   };
 
+                    dgvEstudiantes.DataSource = consulta.ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar estudiantes: " + ex.Message);
             }
         }
         private void btnBuscar_Click(object sender, EventArgs e)
         {
-            string idMateria = cbxMaterias.SelectedValue.ToString();
-            string criterio = txtBuscar.Text.Trim();
-
-            using (var db = new SistemaGestionAcademicaEntities1())
+            try
             {
-                var consulta = from m in db.Matriculas
-                               join u in db.Usuarios on m.CedulaEstudiante equals u.Cedula
-                               join n in db.Notas on m.IdMatricula equals n.IdMatricula
-                               where m.IdMateria == idMateria &&
-                                     (u.Cedula.Contains(criterio) || u.PrimerNombre.Contains(criterio))
-                               select new
-                               {   
-                                   m.IdMatricula,
-                                   u.Cedula,
-                                   u.PrimerNombre,
-                                   u.PrimerApellido,
-                                   n.Nota1,
-                                   n.Nota2,
-                                   n.Supletorio,
-                               };
+                string idMateria = cbxMaterias.SelectedValue.ToString();
+                string criterio = txtBuscar.Text.Trim();
 
-                dgvEstudiantes.DataSource = consulta.ToList();
-                Limpiar();
+                using (var db = new SistemaGestionAcademicaEntities1())
+                {
+                    var consulta = from m in db.Matriculas
+                                   join u in db.Usuarios on m.CedulaEstudiante equals u.Cedula
+                                   join n in db.Notas on m.IdMatricula equals n.IdMatricula
+                                   where m.IdMateria == idMateria &&
+                                         (u.Cedula.Contains(criterio) || u.PrimerNombre.Contains(criterio))
+                                   select new
+                                   {
+                                       m.IdMatricula,
+                                       u.Cedula,
+                                       u.PrimerNombre,
+                                       u.PrimerApellido,
+                                       n.Nota1,
+                                       n.Nota2,
+                                       n.Supletorio,
+                                   };
+
+                    dgvEstudiantes.DataSource = consulta.ToList();
+                    Limpiar();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al buscar estudiantes: " + ex.Message);
             }
 
         }
 
         private void btnGuardar_Click(object sender, EventArgs e)
         {
-            if (dgvEstudiantes.CurrentRow != null)
+            try
             {
-                string idMatricula = dgvEstudiantes.CurrentRow.Cells["idMatricula"].Value.ToString();
-                int idMat = Convert.ToInt32(idMatricula);
-                string idMateria = cbxMaterias.SelectedValue.ToString();
-                using (var db = new SistemaGestionAcademicaEntities1())
+                if (dgvEstudiantes.CurrentRow != null)
                 {
-                    var nota = db.Notas
-                        .FirstOrDefault(n => n.IdMatricula == idMat);
+                    int idMat = Convert.ToInt32(dgvEstudiantes.CurrentRow.Cells["idMatricula"].Value);
 
-                    if (nota != null)
+                    using (var db = new SistemaGestionAcademicaEntities1())
                     {
-                        nota.Nota1 = Convert.ToDecimal(txtNota1.Text);
-                        nota.Nota2 = Convert.ToDecimal(txtNota2.Text);
-                        nota.Supletorio = Convert.ToDecimal(txtSupletorio.Text);
+                        var nota = db.Notas.FirstOrDefault(n => n.IdMatricula == idMat);
+                        if (nota != null)
+                        {
+                            nota.Nota1 = Convert.ToDecimal(txtNota1.Text);
+                            nota.Nota2 = Convert.ToDecimal(txtNota2.Text);
+                            nota.Supletorio = Convert.ToDecimal(txtSupletorio.Text);
 
-                        db.SaveChanges();
-                        MessageBox.Show("Notas Guardadas correctamente.");
-                        btnBuscar_Click(sender, e);
-                        Limpiar();
+                            db.SaveChanges();
+                            MessageBox.Show("Notas guardadas correctamente.");
+                            btnBuscar_Click(sender, e);
+                            Limpiar();
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar notas: " + ex.Message);
             }
         }
 
         private void dgvEstudiantes_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            try
             {
-                txtNota1.Text = dgvEstudiantes.Rows[e.RowIndex].Cells["Nota1"].Value.ToString();
-                txtNota2.Text = dgvEstudiantes.Rows[e.RowIndex].Cells["Nota2"].Value.ToString();
-                txtSupletorio.Text = dgvEstudiantes.Rows[e.RowIndex].Cells["Supletorio"].Value.ToString();
+                if (e.RowIndex >= 0)
+                {
+                    txtNota1.Text = dgvEstudiantes.Rows[e.RowIndex].Cells["Nota1"].Value?.ToString() ?? "";
+                    txtNota2.Text = dgvEstudiantes.Rows[e.RowIndex].Cells["Nota2"].Value?.ToString() ?? "";
+                    txtSupletorio.Text = dgvEstudiantes.Rows[e.RowIndex].Cells["Supletorio"].Value?.ToString() ?? "";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al seleccionar estudiante: " + ex.Message);
             }
         }
 
         private void btnModificar_Click(object sender, EventArgs e)
         {
-            if (dgvEstudiantes.CurrentRow != null)
+            try
             {
-                string idMatricula = dgvEstudiantes.CurrentRow.Cells["idMatricula"].Value.ToString();
-                int idMat = Convert.ToInt32(idMatricula);
-                string idMateria = cbxMaterias.SelectedValue.ToString();
-                using (var db = new SistemaGestionAcademicaEntities1())
+                if (dgvEstudiantes.CurrentRow != null)
                 {
-                    var nota = db.Notas
-                        .FirstOrDefault(n => n.IdMatricula == idMat);
+                    int idMat = Convert.ToInt32(dgvEstudiantes.CurrentRow.Cells["idMatricula"].Value);
 
-                    if (nota != null)
+                    using (var db = new SistemaGestionAcademicaEntities1())
                     {
-                        nota.Nota1 = Convert.ToDecimal(txtNota1.Text);
-                        nota.Nota2 = Convert.ToDecimal(txtNota2.Text);
-                        nota.Supletorio = Convert.ToDecimal(txtSupletorio.Text);
+                        var nota = db.Notas.FirstOrDefault(n => n.IdMatricula == idMat);
+                        if (nota != null)
+                        {
+                            nota.Nota1 = Convert.ToDecimal(txtNota1.Text);
+                            nota.Nota2 = Convert.ToDecimal(txtNota2.Text);
+                            nota.Supletorio = Convert.ToDecimal(txtSupletorio.Text);
 
-                        db.SaveChanges();
-                        MessageBox.Show("Notas Modificadas correctamente.");
-                        btnBuscar_Click(sender, e);
-                        Limpiar();
+                            db.SaveChanges();
+                            MessageBox.Show("Notas modificadas correctamente.");
+                            btnBuscar_Click(sender, e);
+                            Limpiar();
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al modificar notas: " + ex.Message);
             }
         }
 
         private void btnEliminar_Click(object sender, EventArgs e)
         {
-            if (dgvEstudiantes.CurrentRow != null)
+            try
             {
-                string idMatricula = dgvEstudiantes.CurrentRow.Cells["idMatricula"].Value.ToString();
-                int idMat = Convert.ToInt32(idMatricula);
-                string idMateria = cbxMaterias.SelectedValue.ToString();
-                using (var db = new SistemaGestionAcademicaEntities1())
+                if (dgvEstudiantes.CurrentRow != null)
                 {
-                    var nota = db.Notas
-                        .FirstOrDefault(n => n.IdMatricula == idMat);
+                    int idMat = Convert.ToInt32(dgvEstudiantes.CurrentRow.Cells["idMatricula"].Value);
 
-                    if (nota != null)
+                    using (var db = new SistemaGestionAcademicaEntities1())
                     {
-                        nota.Nota1 = Convert.ToDecimal(0);
-                        nota.Nota2 = Convert.ToDecimal(0);
-                        nota.Supletorio = Convert.ToDecimal(0);
+                        var nota = db.Notas.FirstOrDefault(n => n.IdMatricula == idMat);
+                        if (nota != null)
+                        {
+                            nota.Nota1 = 0;
+                            nota.Nota2 = 0;
+                            nota.Supletorio = 0;
 
-                        db.SaveChanges();
-                        MessageBox.Show("Notas Eliminadaas correctamente.");
-                        btnBuscar_Click(sender, e);
-                        Limpiar();
+                            db.SaveChanges();
+                            MessageBox.Show("Notas eliminadas correctamente.");
+                            btnBuscar_Click(sender, e);
+                            Limpiar();
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al eliminar notas: " + ex.Message);
             }
         }
 
         private void btnCerrar_Click(object sender, EventArgs e)
         {
-            new Profesor().Show();
-            this.Hide();
+            try
+            {
+                new Profesor().Show();
+                this.Hide();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cerrar la ventana: " + ex.Message);
+            }
         }
 
         private void cbxMaterias_Click(object sender, EventArgs e)
         {
-            CargarEstudiantes();
+            try
+            {
+                CargarEstudiantes();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al cargar estudiantes: " + ex.Message);
+            }
         }
 
         private void btnExportarNotas_Click(object sender, EventArgs e)
